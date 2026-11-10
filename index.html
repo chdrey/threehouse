@@ -3,86 +3,230 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Threehouse</title>
-<meta name="description" content="Threehouse: small 3D worlds you can play in your browser.">
-<meta name="theme-color" content="#0b111a">
-<meta property="og:title" content="Threehouse">
-<meta property="og:description" content="Small 3D worlds you can play in your browser.">
-<meta property="og:image" content="assets/sandworm.jpg">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b111a'/%3E%3Cpath d='M32 58V30M32 40l-9-7M32 36l9-6' stroke='%23c9a46a' stroke-width='4' stroke-linecap='round' fill='none'/%3E%3Ccircle cx='32' cy='16' r='8' fill='%23e2bd83'/%3E%3Ccircle cx='17' cy='29' r='6.5' fill='%23d14f63'/%3E%3Ccircle cx='47' cy='27' r='7' fill='%2373b3c9'/%3E%3C/svg%3E">
+<title>Threehouse Studio</title>
+<meta name="description" content="Threehouse Studio grows small 3D worlds you can play right in your browser.">
+<meta name="theme-color" content="#0a0f17">
+<meta property="og:title" content="Threehouse Studio">
+<meta property="og:description" content="Small 3D worlds you can play right in your browser.">
+<meta property="og:image" content="https://threehousestudio.com/assets/sandworm.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0f17'/%3E%3Cpath d='M32 58V30M32 40l-9-7M32 36l9-6' stroke='%23c9a46a' stroke-width='4' stroke-linecap='round' fill='none'/%3E%3Ccircle cx='32' cy='16' r='8' fill='%23e2bd83'/%3E%3Ccircle cx='17' cy='29' r='6.5' fill='%23d14f63'/%3E%3Ccircle cx='47' cy='27' r='7' fill='%2373b3c9'/%3E%3C/svg%3E">
 <style>
 :root{
-  --bg:#0b111a;--bg-2:#111a26;--ink:#efe6d4;--muted:#a3a9a0;--gold:#e2bd83;--gold-2:#c9a46a;--magenta:#d14f63;--sky:#73b3c9;
-  --line:#e2bd8326;--card:#121b27;--radius:14px;
+  --bg:#0a0f17;--bg-2:#0f1722;--panel:#121b27;--ink:#f1e8d6;--muted:#a1a89f;--dim:#6f776e;
+  --gold:#e2bd83;--gold-2:#c9a46a;--magenta:#d14f63;--sky:#73b3c9;--line:#e2bd8324;--r:16px;
 }
 *{box-sizing:border-box}
-html{color-scheme:dark}
-body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -10%,#1a2636 0,var(--bg) 60%) fixed,var(--bg);color:var(--ink);
-  font:16px/1.6 Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}
-a{color:inherit}
-.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
-header{padding:56px 0 24px;text-align:center}
-.mark{width:88px;height:88px;display:block;margin:0 auto 18px}
-h1{margin:0;font:400 clamp(40px,7vw,68px)/1 Georgia,'Times New Roman',serif;letter-spacing:.06em;color:var(--gold)}
-.tagline{margin:16px auto 0;max-width:520px;color:var(--muted);font-size:15px;letter-spacing:.02em}
-.rule{width:56px;height:1px;margin:28px auto 0;background:var(--magenta);box-shadow:0 0 10px #d14f6388}
-main{padding:40px 0 72px}
-.section-label{font:500 11px/1 Arial,Helvetica,sans-serif;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);margin:0 0 16px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:24px}
-.card{position:relative;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);overflow:hidden;
-  text-decoration:none;transition:border-color .25s,transform .25s,box-shadow .25s}
-a.card:hover,a.card:focus-visible{border-color:#e2bd8380;transform:translateY(-3px);box-shadow:0 16px 40px #00000066}
-a.card:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
-.thumb{aspect-ratio:16/9;background:#0d141e center/cover no-repeat}
-.body{padding:20px 22px 22px;display:flex;flex-direction:column;gap:8px;flex:1}
-.card h2{margin:0;font:400 24px/1.2 Georgia,'Times New Roman',serif;color:var(--ink)}
-.card p{margin:0;color:var(--muted);font-size:14px}
-.play{margin-top:auto;padding-top:12px;font:500 12px/1 Arial,Helvetica,sans-serif;letter-spacing:.24em;text-transform:uppercase;color:var(--gold)}
-.play::after{content:' →'}
-.tag{position:absolute;top:12px;left:12px;padding:5px 9px;border-radius:999px;background:#0b111ad0;border:1px solid var(--line);
-  font:500 10px/1 Arial,Helvetica,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
-.card.soon{border-style:dashed;justify-content:center;align-items:center;text-align:center;min-height:260px;background:transparent}
-.card.soon h2{color:var(--muted);font-size:20px}
-.card.soon svg{width:44px;height:44px;margin-bottom:12px;opacity:.7}
-footer{border-top:1px solid #ffffff10;padding:24px 0 40px;color:#7d847b;font-size:12px;text-align:center}
-@media (max-width:560px){header{padding-top:40px}.wrap{padding:0 16px}.grid{grid-template-columns:1fr}}
-@media (prefers-reduced-motion:reduce){a.card{transition:none}a.card:hover{transform:none}}
+html{scroll-behavior:smooth;color-scheme:dark}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1160px;margin:0 auto;padding:0 28px}
+.serif{font-family:Georgia,'Times New Roman',serif;font-weight:400}
+.eyebrow{font:500 11px/1 Arial,Helvetica,sans-serif;letter-spacing:.3em;text-transform:uppercase;color:var(--gold)}
+
+
+/* Nav */
+nav{position:sticky;top:0;z-index:10;background:#0a0f17d9;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #ffffff0d}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:72px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand svg{width:34px;height:34px}
+.brand b{font:400 21px/1 Georgia,serif;letter-spacing:.04em;color:var(--ink)}
+.brand span{font:500 10px/1 Arial;letter-spacing:.32em;text-transform:uppercase;color:var(--muted);margin-left:2px}
+.links{display:flex;gap:30px;align-items:center;font-size:14px;color:var(--muted)}
+.links a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:46px;padding:0 24px;border-radius:4px;font:500 12px/1 Arial;letter-spacing:.22em;text-transform:uppercase;transition:background .2s,border-color .2s,color .2s}
+.btn.primary{background:var(--gold);color:#1a140c}
+.btn.primary:hover{background:#f0cf98}
+.btn.ghost{border:1px solid #e2bd8366;color:var(--gold)}
+.btn.ghost:hover{border-color:var(--gold);background:#e2bd8312}
+.pill{font:500 10px/1 Arial;letter-spacing:.16em;text-transform:uppercase;padding:5px 8px;border-radius:999px;border:1px solid var(--line);color:var(--dim)}
+
+/* Hero */
+.hero{position:relative;overflow:hidden;border-bottom:1px solid #ffffff0d}
+.hero .bg{position:absolute;top:0;bottom:0;right:0;left:34%;background:url('assets/sandworm-hero.jpg') 30% 45%/cover no-repeat;opacity:.85}
+.hero .bg::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,var(--bg) 0%,#0a0f1799 22%,transparent 55%),linear-gradient(0deg,var(--bg) 0%,transparent 40%)}
+.hero .wrap{position:relative;min-height:min(78vh,720px);display:flex;flex-direction:column;justify-content:center;padding-top:64px;padding-bottom:88px}
+.hero h1{margin:18px 0 0;font:400 clamp(44px,6.6vw,84px)/1.02 Georgia,serif;letter-spacing:-.01em;max-width:11ch}
+.hero h1 em{font-style:italic;color:var(--gold)}
+.hero p{max-width:470px;margin:22px 0 0;color:#c9cdc3;font-size:17px}
+.hero .cta{display:flex;gap:14px;margin-top:34px;flex-wrap:wrap}
+.now{position:absolute;right:28px;bottom:32px;display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--line);border-radius:10px;background:#0a0f17b3;backdrop-filter:blur(8px)}
+.now i{width:8px;height:8px;border-radius:50%;background:#7fd88f;box-shadow:0 0 10px #7fd88f}
+.now small{display:block;color:var(--muted);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.now strong{font:400 16px/1.2 Georgia,serif}
+
+/* Sections */
+section{padding:96px 0}
+.head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:36px}
+.head h2{margin:12px 0 0;font:400 clamp(30px,3.6vw,44px)/1.1 Georgia,serif}
+.head p{margin:0;max-width:380px;color:var(--muted);font-size:15px}
+
+/* Worlds */
+.worlds{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:24px}
+.world{position:relative;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;transition:transform .25s,border-color .25s,box-shadow .25s}
+a.world:hover{transform:translateY(-4px);border-color:#e2bd8370;box-shadow:0 20px 50px #0008}
+.world .img{aspect-ratio:16/10;background:#0d141e center/cover}
+.world.feature .img{aspect-ratio:auto;flex:1;min-height:300px}
+.world .body{padding:22px 24px 24px}
+.world h3{margin:6px 0 6px;font:400 26px/1.15 Georgia,serif}
+.world p{margin:0;color:var(--muted);font-size:14px}
+.world .meta{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.chip{font:500 10px/1 Arial;letter-spacing:.16em;text-transform:uppercase;padding:6px 9px;border-radius:999px;background:#ffffff08;border:1px solid #ffffff12;color:#c9cdc3}
+.world.soon{border-style:dashed;background:transparent}
+.world.soon .img{display:grid;place-items:center;background:radial-gradient(circle at 50% 55%,#16212e,#0d141e 70%)}
+.world.soon .img svg{width:72px;height:72px;opacity:.55}
+.world.soon h3{color:#c9cdc3}
+
+/* Branches strip */
+.branches{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#ffffff0f;border:1px solid #ffffff0f;border-radius:var(--r);overflow:hidden}
+.branch{background:var(--bg-2);padding:32px 28px}
+.branch .n{font:400 40px/1 Georgia,serif;color:var(--gold)}
+.branch h4{margin:16px 0 8px;font:400 20px/1.2 Georgia,serif}
+.branch p{margin:0;color:var(--muted);font-size:14px}
+
+/* VR band */
+.vr{position:relative;border-radius:22px;overflow:hidden;border:1px solid var(--line);background:radial-gradient(ellipse at 80% 20%,#1d2b3d 0,#0f1722 55%);padding:64px}
+.vr .grid{display:grid;grid-template-columns:1.2fr 1fr;gap:48px;align-items:center}
+.vr h2{margin:14px 0 14px;font:400 clamp(30px,3.4vw,42px)/1.12 Georgia,serif}
+.vr p{color:#c9cdc3;margin:0 0 26px;max-width:460px}
+.orbit{position:relative;width:100%;aspect-ratio:1;max-width:340px;margin-left:auto}
+.orbit .ring{position:absolute;inset:0;border:1px dashed #e2bd8340;border-radius:50%}
+.orbit .ring.b{inset:16%;border-color:#73b3c94d}
+.orbit .w{position:absolute;border-radius:50%}
+.orbit .w1{width:28%;height:28%;left:36%;top:36%;background:radial-gradient(circle at 35% 30%,#f6dfb2,#c98f4c 60%,#7a4f22)}
+.orbit .w2{width:13%;height:13%;left:5%;top:30%;background:radial-gradient(circle at 35% 30%,#ff9aa8,#d14f63 60%,#6e1f2c)}
+.orbit .w3{width:15%;height:15%;right:12%;top:12%;background:radial-gradient(circle at 35% 30%,#bfe6f2,#73b3c9 60%,#2b5868)}
+.orbit .w4{width:9%;height:9%;right:22%;bottom:8%;background:radial-gradient(circle at 35% 30%,#d9f0c8,#8fb879 60%,#3d5a2e)}
+
+/* Newsletter */
+.signup{display:flex;gap:12px;max-width:440px}
+.signup input{flex:1;min-height:46px;padding:0 16px;border-radius:4px;border:1px solid #ffffff1f;background:#0a0f17;color:var(--ink);font:15px Arial}
+.signup input::placeholder{color:var(--dim)}
+
+/* About + footer */
+.about{display:grid;grid-template-columns:1fr 1.2fr;gap:64px;align-items:start}
+.about h2{margin:12px 0 0;font:400 clamp(30px,3.4vw,42px)/1.12 Georgia,serif}
+.about p{color:#c9cdc3;margin:0 0 16px}
+footer{border-top:1px solid #ffffff0d;padding:40px 0 56px;color:var(--dim);font-size:13px}
+footer .wrap{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}
+footer nav{position:static;background:none;border:0;backdrop-filter:none;display:flex;gap:22px}
+
+@media(max-width:900px){
+  .hero .bg{left:0;opacity:.45}
+  .links a:not(.btn){display:none}
+  .worlds{grid-template-columns:1fr}
+  .world.feature .img{min-height:220px}
+  .branches{grid-template-columns:1fr}
+  .vr{padding:40px 24px}.vr .grid{grid-template-columns:1fr}.orbit{max-width:240px;margin:0 auto}
+  .about{grid-template-columns:1fr;gap:20px}
+  .head{flex-direction:column;align-items:start}
+  .now{display:none}
+}
+@media(max-width:520px){.wrap{padding:0 16px}section{padding:72px 0}.signup{flex-direction:column}.brand span{display:none}}
 </style>
 </head>
 <body>
-<header class="wrap">
-  <!-- Mark: a small tree whose crown is three little worlds. -->
-  <svg class="mark" viewBox="0 0 64 64" aria-hidden="true">
-    <path d="M32 60V30M32 41l-10-8M32 37l10-7" stroke="#c9a46a" stroke-width="3" stroke-linecap="round" fill="none"/>
-    <circle cx="32" cy="15" r="9" fill="#e2bd83"/>
-    <circle cx="16" cy="29" r="7" fill="#d14f63"/>
-    <circle cx="48" cy="27" r="7.5" fill="#73b3c9"/>
-  </svg>
-  <h1>Threehouse</h1>
-  <p class="tagline">Small 3D worlds you can play right in your browser. A new branch grows every so often.</p>
-  <div class="rule"></div>
-</header>
 
-<main class="wrap">
-  <p class="section-label">Worlds</p>
-  <div class="grid">
-    <a class="card" href="sandworm/">
-      <span class="tag">New</span>
-      <div class="thumb" style="background-image:url('assets/sandworm.jpg')" role="img" aria-label="A giant sandworm rising from a tiny desert planet"></div>
-      <div class="body">
-        <h2>Sandworm Simulator</h2>
-        <p>Ride the dunes as a giant sandworm on a tiny desert planet. Answer the thumpers, carry Fremen riders, swallow harvesters.</p>
-        <span class="play">Play</span>
-      </div>
+<nav>
+  <div class="wrap">
+    <a class="brand" href="./">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 60V30M32 41l-10-8M32 37l10-7" stroke="#c9a46a" stroke-width="3" stroke-linecap="round" fill="none"/><circle cx="32" cy="15" r="9" fill="#e2bd83"/><circle cx="16" cy="29" r="7" fill="#d14f63"/><circle cx="48" cy="27" r="7.5" fill="#73b3c9"/></svg>
+      <b>Threehouse</b><span>Studio</span>
     </a>
-    <div class="card soon" aria-label="More worlds coming">
-      <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 56V30" stroke="#7d847b" stroke-width="3" stroke-linecap="round"/><circle cx="32" cy="22" r="9" fill="none" stroke="#7d847b" stroke-width="2" stroke-dasharray="4 4"/></svg>
-      <h2>More worlds growing</h2>
-      <p>The next branch is on its way.</p>
+    <div class="links">
+      <a href="#worlds">Worlds</a>
+      <a href="#studio">Studio</a>
+      <a href="#vr">VR <span class="pill">Soon</span></a>
+      <a class="btn ghost" href="sandworm/">Play</a>
     </div>
   </div>
-</main>
+</nav>
 
-<footer class="wrap">© 2026 Threehouse · Built with three.js</footer>
+<header class="hero">
+  <div class="bg" aria-hidden="true"></div>
+  <div class="wrap">
+    <span class="eyebrow">Threehouse Studio</span>
+    <h1>Small worlds, <em>grown</em> for your browser.</h1>
+    <p>We build tiny 3D planets you can play in a click. No downloads, no installs. Just open a world and step in.</p>
+    <div class="cta">
+      <a class="btn primary" href="sandworm/">Play Sandworm Simulator</a>
+      <a class="btn ghost" href="#worlds">See all worlds</a>
+    </div>
+  </div>
+  <div class="now"><i></i><div><small>Now playing</small><strong>Sandworm Simulator</strong></div></div>
+</header>
+
+<section id="worlds">
+  <div class="wrap">
+    <div class="head">
+      <div><span class="eyebrow">The worlds</span><h2>Each world is a branch.</h2></div>
+      <p>Every world is its own tiny planet with its own rules. New branches grow on the tree every so often.</p>
+    </div>
+    <div class="worlds">
+      <a class="world feature" href="sandworm/">
+        <div class="img" style="background-image:url('assets/sandworm.jpg')"></div>
+        <div class="body">
+          <span class="eyebrow">Playable now</span>
+          <h3>Sandworm Simulator</h3>
+          <p>Ride the dunes as a giant sandworm on a tiny desert planet. Answer the thumpers, carry riders, swallow harvesters.</p>
+          <div class="meta"><span class="chip">Desktop</span><span class="chip">Mobile</span><span class="chip">WebGPU</span></div>
+        </div>
+      </a>
+      <div class="world soon">
+        <div class="img"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="18" fill="none" stroke="#73b3c9" stroke-width="2" stroke-dasharray="5 5"/><path d="M14 36c10 4 26 4 36 0" stroke="#73b3c9" stroke-width="2" fill="none"/></svg></div>
+        <div class="body"><span class="eyebrow" style="color:var(--sky)">Growing</span><h3>Ocean world</h3><p>Next branch: a little water planet. Details soon.</p></div>
+      </div>
+      <div class="world soon">
+        <div class="img"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="18" fill="none" stroke="#8fb879" stroke-width="2" stroke-dasharray="5 5"/><path d="M32 46V26M32 34l-6-5M32 31l6-4" stroke="#8fb879" stroke-width="2" fill="none" stroke-linecap="round"/></svg></div>
+        <div class="body"><span class="eyebrow" style="color:#8fb879">Seed</span><h3>Forest world</h3><p>A mossy planet under a giant tree. Still a seed.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="branches">
+      <div class="branch"><div class="n">01</div><h4>Click and play</h4><p>Every world runs straight in the browser, on desktop, phone and tablet.</p></div>
+      <div class="branch"><div class="n">02</div><h4>Tiny planets</h4><p>Whole worlds small enough to hold in one view, full of life up close.</p></div>
+      <div class="branch"><div class="n">03</div><h4>Built with three.js</h4><p>Real-time 3D on the open web, rendered with WebGPU where your device supports it.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="vr" style="padding-top:0">
+  <div class="wrap">
+    <div class="vr">
+      <div class="grid">
+        <div>
+          <span class="eyebrow">Coming later</span>
+          <h2>Hang out in the worlds, together.</h2>
+          <p>One day you'll be able to put on a headset, step onto these planets and meet friends there. We're not there yet, but every world is being built with it in mind.</p>
+          <span class="pill" style="font-size:11px;padding:8px 12px;color:var(--muted)">In the works</span>
+        </div>
+        <div class="orbit" aria-hidden="true">
+          <div class="ring"></div><div class="ring b"></div>
+          <div class="w w1"></div><div class="w w2"></div><div class="w w3"></div><div class="w w4"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="studio" style="padding-top:0">
+  <div class="wrap about">
+    <div><span class="eyebrow">The studio</span><h2>A treehouse for small worlds.</h2></div>
+    <div>
+      <p>Threehouse is a one-person studio making small, handcrafted 3D worlds for the web. Like a treehouse, it's a place you climb up to, a bit hidden, a bit magical, and always growing.</p>
+      <p>The name is a nod to three.js, the open-source 3D engine every world here is built on.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>© 2026 Threehouse Studio · threehousestudio.com</span>
+    <nav><a href="#worlds">Worlds</a><a href="#studio">Studio</a><a href="#vr">VR</a></nav>
+  </div>
+</footer>
 </body>
 </html>
