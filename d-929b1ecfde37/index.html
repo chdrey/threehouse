@@ -145,7 +145,7 @@ let S=null, Q=null, QSTATE='loading', COUNCIL=[], tab='home', storageOK=true, me
 function lsGet(k){try{return localStorage.getItem(k)}catch(e){storageOK=false;return null}}
 function lsSet(k,v){try{localStorage.setItem(k,v);return true}catch(e){storageOK=false;return false}}
 function newState(){return{v:1,created:Date.now(),startDay:new Date().toISOString().slice(0,10),cash:START_CASH,start:START_CASH,vooStart:null,pos:{},trades:[],preds:[],hist:[],dayBase:null,notices:[],lastBackup:0,snooze:0}}
-function load(){const r=lsGet(KEY);if(r){try{const o=JSON.parse(r);if(o&&o.v===1)return o}catch(e){}}return memCopy?JSON.parse(memCopy):null}
+function load(){const r=lsGet(KEY);if(r){try{const o=JSON.parse(r);if(o&&o.v===1){if((o.start||0)<START_CASH&&!(o.trades||[]).length&&!Object.keys(o.pos||{}).length){o.cash=START_CASH;o.start=START_CASH;o.dayBase=null;o.hist=[];lsSet(KEY,JSON.stringify(o))}return o}}catch(e){}}return memCopy?JSON.parse(memCopy):null}
 function save(){const j=JSON.stringify(S);memCopy=j;lsSet(KEY,j)}
 
 /* ---------- quotes / valuation ---------- */
