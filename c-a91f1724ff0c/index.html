@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Practice Trader (Chris)</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Practice (Chris)">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f3f5f8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f141b" media="(prefers-color-scheme: dark)">
+<style>
+:root{--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;
+--bg:#f3f5f8;--card:#fff;--card2:#eaeef3;--line:#d5dce5;--tx:#14202e;--mut:#4d5b6c;--up:#0a7a3f;--dn:#c62828;--warn:#8f5400;--acc:#1459c7;--onacc:#fff;
+--upbg:#e3f4ea;--dnbg:#fbe6e6;--warnbg:#fdf0d9}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f141b;--card:#18202b;--card2:#222c39;--line:#2f3b4a;--tx:#eef2f7;--mut:#a3b0c0;--up:#4fdb8f;--dn:#ff8080;--warn:#f5b84b;--acc:#79adff;--onacc:#06101f;--upbg:#12301f;--dnbg:#3a1a1c;--warnbg:#3a2d10}}
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--tx);font:17px/1.45 -apple-system,system-ui,"Segoe UI",Roboto,sans-serif;min-height:100vh;
+ padding-bottom:calc(72px + env(safe-area-inset-bottom));-webkit-tap-highlight-color:transparent}
+body.lock{overflow:hidden}
+button,input,textarea{font:inherit;color:inherit}
+.up{color:var(--up)}.dn{color:var(--dn)}.mut{color:var(--mut)}.warn{color:var(--warn)}
+.num{font-variant-numeric:tabular-nums}
+header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding:calc(var(--s3) + env(safe-area-inset-top)) var(--s4) var(--s3)}
+.wrap{max-width:1040px;margin:0 auto}
+.hrow{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);flex-wrap:wrap}
+h1{font-size:22px;line-height:1.2}
+.practice{display:inline-block;font-size:14px;font-weight:700;letter-spacing:.03em;padding:var(--s1) var(--s3);border-radius:999px;background:var(--warnbg);color:var(--warn);border:1px solid var(--warn)}
+.badge{display:inline-block;font-size:14px;font-weight:600;padding:var(--s1) var(--s2);border-radius:8px;background:var(--card2);color:var(--mut)}
+.badge.open{color:var(--up)}
+main{padding:var(--s4);max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:var(--s4)}
+.grid{display:grid;gap:var(--s4);grid-template-columns:1fr}
+@media (min-width:768px){.grid.two{grid-template-columns:1fr 1fr}.grid.two>.span{grid-column:1/-1}body{padding-bottom:var(--s5)}}
+.col{display:flex;flex-direction:column;gap:var(--s4);min-width:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:var(--s4)}
+.card h2{font-size:19px;margin-bottom:var(--s3)}
+.cap{font-size:14px;color:var(--mut)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:var(--s3)}
+.stack{display:flex;flex-direction:column;gap:var(--s2)}
+.btn{min-height:48px;min-width:48px;padding:0 var(--s4);border-radius:12px;border:1px solid var(--line);background:var(--card2);cursor:pointer;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:var(--s2)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:var(--onacc)}
+.btn.sell{background:var(--dn);border-color:var(--dn);color:#fff}
+.btn.ghost{background:transparent}
+.btn[disabled]{opacity:.45;cursor:default}
+.btns{display:flex;gap:var(--s3);flex-wrap:wrap}.btns .btn{flex:1 1 140px}
+.chips{display:flex;flex-wrap:wrap;gap:var(--s2)}
+.chip{min-height:44px;min-width:44px;padding:0 var(--s3);border-radius:999px;border:1px solid var(--line);background:var(--card2);cursor:pointer;font-weight:600}
+.chip[aria-pressed=true]{background:var(--acc);border-color:var(--acc);color:var(--onacc)}
+nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;min-height:64px;background:none;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:14px;font-weight:600;color:var(--mut)}
+nav button .ic{font-size:22px;line-height:1}
+nav button[aria-current=page]{color:var(--acc)}
+@media (min-width:768px){nav{position:static;border:0;background:none;max-width:1040px;margin:var(--s3) auto 0;padding:0 var(--s4);gap:var(--s2)}
+ nav button{flex-direction:row;min-height:48px;gap:var(--s2);font-size:17px;border-radius:12px;background:var(--card2);border:1px solid var(--line)}
+ nav button[aria-current=page]{background:var(--acc);color:var(--onacc);border-color:var(--acc)}
+ header{position:static}}
+.big{font-size:38px;font-weight:700;line-height:1.1;letter-spacing:-.01em}
+.med{font-size:21px;font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--s3);margin-top:var(--s4)}
+.stat{background:var(--card2);border-radius:12px;padding:var(--s3)}
+.stat .v{font-size:21px;font-weight:700}
+.item{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);padding:var(--s3) 0;border-top:1px solid var(--line);min-height:64px;width:100%;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left;cursor:pointer}
+.item.static{cursor:default}
+.item:first-of-type{border-top:0}
+.sym{font-weight:700;font-size:19px}
+.left{display:flex;flex-direction:column;min-width:0;flex:1}
+.left .cap{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item.static .left .cap{white-space:normal}
+.right{text-align:right;display:flex;flex-direction:column;align-items:flex-end;flex:none;min-width:96px}
+.pill{font-size:15px;font-weight:700;padding:2px var(--s2);border-radius:8px}
+.pill.up{background:var(--upbg)}.pill.dn{background:var(--dnbg)}.pill.flat{background:var(--card2);color:var(--mut)}
+.tag{display:inline-block;font-size:14px;font-weight:600;padding:2px var(--s2);border-radius:8px;background:var(--card2);color:var(--mut)}
+.tag.up{background:var(--upbg);color:var(--up)}.tag.dn{background:var(--dnbg);color:var(--dn)}
+.win{border-left:5px solid var(--up);padding-left:var(--s3)!important}
+.loss{border-left:5px solid var(--dn);padding-left:var(--s3)!important}
+.buyrow{border-left:5px solid var(--line);padding-left:var(--s3)!important}
+input[type=text],input[type=number],input[type=search],textarea{width:100%;min-height:48px;padding:var(--s2) var(--s3);border-radius:12px;border:1px solid var(--line);background:var(--card2);font-size:18px}
+textarea{min-height:88px;resize:vertical}
+input[type=range]{width:100%;min-height:44px;accent-color:var(--acc)}
+label.l{display:block;font-weight:700}
+.field{display:flex;flex-direction:column;gap:var(--s2)}
+.banner{border-radius:12px;padding:var(--s3) var(--s4);background:var(--warnbg);color:var(--tx);border:1px solid var(--warn);display:flex;flex-direction:column;gap:var(--s2)}
+.banner b{color:var(--warn)}
+.elder{display:flex;gap:var(--s3);align-items:flex-start;padding:var(--s3);border-radius:12px;border:1px solid var(--line);border-left-width:6px;background:var(--card2)}
+.elder.l0{border-left-color:var(--up)}.elder.l1{border-left-color:var(--warn)}.elder.l2{border-left-color:var(--dn)}
+.elder .em{font-size:28px;line-height:1.1}
+.elder .nm{font-weight:700}
+.elder .vd{font-weight:700;font-size:15px;margin-left:var(--s2)}
+.l0 .vd{color:var(--up)}.l1 .vd{color:var(--warn)}.l2 .vd{color:var(--dn)}
+.elder .tx{font-size:16px}.elder .dt{font-size:14px;color:var(--mut)}
+svg.chart{width:100%;height:auto;display:block}
+.spark{width:84px;height:32px;flex:none}
+.sheet{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center}
+.sheet[hidden]{display:none}
+.panel{background:var(--bg);width:100%;max-width:600px;max-height:94%;overflow:auto;overscroll-behavior:contain;border-radius:24px 24px 0 0;padding:var(--s4) var(--s4) calc(var(--s5) + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:var(--s4);border:1px solid var(--line)}
+@media (min-width:768px){.sheet{align-items:center}.panel{border-radius:24px;max-height:90%}}
+.ph{display:flex;align-items:center;justify-content:space-between;gap:var(--s3)}
+.ph h2{font-size:22px}
+.seg{display:flex;gap:var(--s2)}.seg .chip{flex:1}
+pre.code{white-space:pre-wrap;word-break:break-all;font-size:13px;background:var(--card2);padding:var(--s3);border-radius:12px;max-height:140px;overflow:auto;user-select:all;-webkit-user-select:all}
+.bar{height:14px;border-radius:7px;background:var(--card2);position:relative;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;background:var(--acc);border-radius:7px}
+.bar b{position:absolute;top:-2px;bottom:-2px;width:3px;background:var(--tx)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom));z-index:70;background:var(--tx);color:var(--bg);padding:var(--s3) var(--s4);border-radius:12px;font-weight:600;max-width:90%}
+@media (min-width:768px){.toast{bottom:var(--s5)}}
+ol.help{padding-left:var(--s5);display:flex;flex-direction:column;gap:var(--s3)}
+a{color:var(--acc)}
+.err{color:var(--dn);font-weight:600}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="hrow">
+    <h1>Practice Trader (Chris)</h1>
+    <div class="row" style="gap:8px;flex-wrap:wrap"><span class="practice">Practice money &middot; not real</span><span class="badge" id="mkt"></span><button class="btn" id="refresh" data-act="refresh" aria-label="Refresh prices">&#8635; Refresh</button></div>
+  </div>
+  <div class="cap" id="age" style="margin-top:4px"></div>
+</div></header>
+<nav id="nav" aria-label="Sections"></nav>
+<main id="main"></main>
+<div class="sheet" id="sheet" hidden><div class="panel" id="panel" role="dialog" aria-modal="true"></div></div>
+<div class="toast" id="toast" hidden></div>
+<noscript><main><div class="card">This page needs JavaScript.</div></main></noscript>
+<script>
+'use strict';
+const PLAYER='Chris', PFX='pt_chris_', KEY=PFX+'v1', START_CASH=100000, SLIP=0.0005;
+const SYNC_URL='';
+const SYNC_KEY='w-ht1VA79svBoVoGmN';
+const APP_VERSION='practice-1';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const usd=(n,d=2)=>(n<0?'-':'')+'$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const sgn=n=>(n>0?'+':n<0?'-':'')+'$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pc=(n,d=2)=>(n>0?'+':n<0?'-':'')+Math.abs(n).toFixed(d)+'%';
+const cls=n=>n>0.004?'up':n<-0.004?'dn':'mut';
+const arrow=n=>n>0.004?'&#9650; ':n<-0.004?'&#9660; ':'';
+const shfmt=q=>(+q).toLocaleString('en-US',{maximumFractionDigits:4});
+const DAY=86400000;
+let S=null, Q=null, QSTATE='loading', COUNCIL=[], tab='home', storageOK=true, memCopy=null, sheetKind=null;
+
+/* ---------- storage ---------- */
+function lsGet(k){try{return localStorage.getItem(k)}catch(e){storageOK=false;return null}}
+function lsSet(k,v){try{localStorage.setItem(k,v);return true}catch(e){storageOK=false;return false}}
+function newState(){return{v:1,created:Date.now(),startDay:new Date().toISOString().slice(0,10),cash:START_CASH,start:START_CASH,vooStart:null,pos:{},trades:[],preds:[],hist:[],dayBase:null,notices:[],lastBackup:0,snooze:0}}
+function load(){const r=lsGet(KEY);if(r){try{const o=JSON.parse(r);if(o&&o.v===1){if((o.start||0)<START_CASH&&!(o.trades||[]).length&&!Object.keys(o.pos||{}).length){o.cash=START_CASH;o.start=START_CASH;o.dayBase=null;o.hist=[];lsSet(KEY,JSON.stringify(o))}return o}}catch(e){}}return memCopy?JSON.parse(memCopy):null}
+function save(){const j=JSON.stringify(S);memCopy=j;lsSet(KEY,j);scheduleSync()}
+function saveQuiet(){const j=JSON.stringify(S);memCopy=j;lsSet(KEY,j)}
+
+/* ---------- quotes / valuation ---------- */
+const qd=sym=>Q&&Q.quotes[sym];
+const fillBuy=p=>p*(1+SLIP), fillSell=p=>p*(1-SLIP);
+function valuation(){
+  let pv=0;const rows=[];
+  for(const [sym,p] of Object.entries(S.pos)){const q=qd(sym);const last=q?q.last:p.avg;const val=p.qty*last;pv+=val;
+    rows.push({sym,qty:p.qty,avg:p.avg,last,val,pnl:p.qty*(last-p.avg),pnlPct:(last/p.avg-1)*100,stop:p.stop,tp:p.tp,opened:p.opened,q})}
+  rows.sort((a,b)=>b.val-a.val);
+  const equity=S.cash+pv;
+  const day=dayPnl(equity);
+  const voo=qd('VOO');const vooRet=(voo&&S.vooStart)?(voo.last/S.vooStart-1)*100:null;
+  const total=equity-S.start;
+  return{equity,pv,rows,day,total,totalPct:total/S.start*100,vooRet}
+}
+function dayPnl(equity){
+  const b=S.dayBase;if(!b)return 0;
+  let base=b.cash;for(const [s,x] of Object.entries(b.pos))base+=x.qty*x.prev;
+  return equity-base;
+}
+function snapshotDay(){
+  if(!Q)return;
+  const d=(qd('VOO')||Object.values(Q.quotes)[0]||{}).day;if(!d)return;
+  if(!S.dayBase||S.dayBase.day!==d){
+    const pos={};for(const [s,p] of Object.entries(S.pos)){const q=qd(s);pos[s]={qty:p.qty,prev:q?q.prev_close:p.avg}}
+    S.dayBase={day:d,cash:S.cash,pos};
+  }
+  const v=valuation();const voo=qd('VOO');
+  const h=S.hist;const e={d,eq:Math.round(v.equity*100)/100,voo:voo?voo.last:null};
+  if(h.length&&h[h.length-1].d===d)h[h.length-1]=e;else h.push(e);
+  if(h.length>400)h.splice(0,h.length-400);
+}
+
+/* ---------- trading ---------- */
+function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,3500)}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function equityNow(){try{return Math.round(valuation().equity*100)/100}catch(e){return null}}
+function doBuy(o){
+  const q=qd(o.sym);if(!q)return'No price available.';
+  const px=fillBuy(q.last);const shares=Math.floor(o.shares*10000)/10000;
+  if(!(shares>0))return'Enter an amount first.';
+  const cost=shares*px;if(cost>S.cash+0.005)return'Not enough cash for that.';
+  const p=S.pos[o.sym]||{qty:0,avg:0,opened:new Date().toISOString().slice(0,10),stop:null,tp:null};
+  p.avg=(p.qty*p.avg+cost)/(p.qty+shares);p.qty+=shares;
+  if(o.stopPct)p.stop=px*(1-o.stopPct/100);if(o.tpPct)p.tp=px*(1+o.tpPct/100);
+  S.pos[o.sym]=p;S.cash-=cost;
+  const tid=uid();
+  S.trades.push({id:tid,t:Date.now(),sym:o.sym,side:'buy',qty:shares,px,why:o.why,conf:o.conf,h:o.horizon,stopPct:o.stopPct||null,tpPct:o.tpPct||null,adv:o.adv||null,eq:o.eq!=null?o.eq:null});
+  const voo=qd('VOO');
+  S.preds.push({id:uid(),tid,t:Date.now(),sym:o.sym,entry:px,voo:voo?voo.last:null,conf:o.conf,h:o.horizon,why:o.why,status:'open'});
+  save();return null;
+}
+function doSell(sym,qty,reason){
+  const p=S.pos[sym],q=qd(sym);if(!p||!q)return'Nothing to sell.';
+  qty=Math.min(qty,p.qty);if(!(qty>0))return'Enter an amount first.';
+  const px=fillSell(q.last);const pnl=(px-p.avg)*qty;
+  S.cash+=qty*px;p.qty-=qty;
+  S.trades.push({id:uid(),t:Date.now(),sym,side:'sell',qty,px,avg:p.avg,pnl,pnlPct:(px/p.avg-1)*100,reason:reason||'sold by you',eq:equityNow()});
+  if(p.qty<1e-6){delete S.pos[sym]}
+  save();return null;
+}
+function checkTriggers(){
+  if(!Q)return;
+  for(const [sym,p] of Object.entries({...S.pos})){
+    const q=qd(sym);if(!q)continue;let why=null;
+    if(p.stop&&q.last<=p.stop)why='stop-loss';else if(p.tp&&q.last>=p.tp)why='take-profit';
+    if(why){const qty=p.qty;doSell(sym,qty,why);
+      S.notices.push({t:Date.now(),text:`${sym}: ${why==='stop-loss'?'your stop-loss was reached':'your take-profit was reached'}. Sold ${shfmt(qty)} shares at the latest price.`});}
+  }
+}
+function gradePreds(){
+  if(!Q)return;let changed=false;
+  const voo=qd('VOO');
+  for(const p of S.preds){
+    if(p.status!=='open')continue;
+    const mat=new Date(p.t+p.h*DAY);const matDay=mat.toISOString().slice(0,10);
+    const q=qd(p.sym);if(!q)continue;
+    const latest=q.day;
+    if(latest<matDay&&Date.now()<p.t+(p.h+3)*DAY)continue;
+    const exitAt=(arr,days,def)=>{if(arr&&days){for(let i=0;i<days.length;i++)if(days[i]>=matDay)return arr[i]}return def};
+    const exit=exitAt(q.month,q.month_d,q.last);
+    const vexit=voo?exitAt(voo.month,voo.month_d,voo.last):null;
+    const up=exit>p.entry?1:0;
+    const ret=(exit/p.entry-1)*100;const vret=(p.voo&&vexit)?(vexit/p.voo-1)*100:null;
+    p.status='graded';p.exit=exit;p.ret=ret;p.vret=vret;p.up=up;p.beat=vret==null?null:(ret>vret?1:0);
+    p.brier=Math.pow(p.conf/100-up,2);p.gradedAt=Date.now();changed=true;
+  }
+  if(changed)save();
+}
+
+/* ---------- elders (deterministic rules, no AI) ---------- */
+function typicalMove(q){const m=q.month;if(!m||m.length<6)return 1.5;let s=0,n=0;for(let i=1;i<m.length;i++){s+=Math.abs(m[i]/m[i-1]-1)*100;n++}return Math.max(0.3,s/n)}
+function councilFor(sym){return COUNCIL.filter(c=>c.ticker===sym)}
+function elders(sym,amount,stopPct,v){
+  const q=qd(sym);const eq=v.equity;
+  /* Minos: risk */
+  const have=(S.pos[sym]?S.pos[sym].qty*q.last:0);
+  const pct=(have+amount)/eq*100;
+  const lossUsd=stopPct?amount*stopPct/100:null, lossPct=lossUsd!=null?lossUsd/eq*100:null;
+  let m=0,mt='';
+  const bump=(l,t)=>{if(l>m||!mt){m=Math.max(m,l);mt=t}};
+  if(amount>S.cash+0.005)bump(2,`You only have ${usd(S.cash,0)} in cash.`);
+  if(pct>20)bump(2,`That would put ${pct.toFixed(0)}% of your account in one stock. The guideline is 20% or less.`);
+  else if(pct>10)bump(1,`That is ${pct.toFixed(0)}% of your account in one stock.`);
+  if(!stopPct)bump(1,'No stop-loss set, so a loss has no limit.');
+  else if(lossPct>5)bump(2,`If your stop-loss is hit you lose about ${lossPct.toFixed(1)}% of your account.`);
+  else if(lossPct>3)bump(1,`If your stop-loss is hit you lose about ${lossPct.toFixed(1)}% of your account.`);
+  if(!mt||m===0)mt=`Sensible size: ${pct.toFixed(0)}% of your account, and the stop-loss limits the loss to ${lossPct.toFixed(1)}%.`;
+  const minos={e:'&#128737;&#65039;',n:'Risk',role:'size and stop-loss',l:m,t:mt,d:`Position after buying: ${pct.toFixed(1)}% of account`+(lossUsd!=null?` · loss if stopped: ${usd(lossUsd,0)} (${lossPct.toFixed(1)}% of account)`:'')};
+  /* Radamantis: evidence */
+  const typ=typicalMove(q);const chg=q.chg_pct;const ratio=Math.abs(chg)/typ;
+  let r=0,rt='';
+  if(chg>=3&&ratio>=2){r=2;rt=`Up ${chg.toFixed(1)}% today, about ${ratio.toFixed(1)} times a normal day. Buying after a big jump is chasing; they often cool off.`}
+  else if(chg<=-3&&ratio>=2){r=1;rt=`Down ${Math.abs(chg).toFixed(1)}% today, about ${ratio.toFixed(1)} times a normal day. Find out why before buying.`}
+  else if(ratio>=1.5){r=1;rt=`A bigger move than usual: ${pc(chg,1)} today versus about ${typ.toFixed(1)}% on a typical day.`}
+  else rt=`An ordinary day: ${pc(chg,1)} versus about ${typ.toFixed(1)}% on a typical day.`;
+  const mn=Math.min(...q.month),mx=Math.max(...q.month);const rngPos=mx>mn?(q.last-mn)/(mx-mn):0.5;
+  let det=`Position in 1-month range: ${Math.round(rngPos*100)}%`;
+  if(rngPos>=0.97&&r<1)det+=' (at its monthly high)';
+  const cs=councilFor(sym).filter(c=>(Date.now()-new Date(c.date).getTime())<21*DAY);
+  if(cs.length){const c=cs[0];det+=` · Advisor ${c.date}: ${c.action}`;if(c.action==='SELL'){r=Math.max(r,1);rt+=` The advisor's nightly review said SELL on ${c.date}.`}else if(c.action==='BUY')rt+=` The advisor's nightly review said BUY on ${c.date}.`;else rt+=` The advisor's nightly review said ${c.action} on ${c.date}.`}
+  else det+=' · No advisor call on this stock lately';
+  const rad={e:'&#128202;',n:'Price move',role:'today vs normal',l:r,t:rt,d:det};
+  /* Eaco: practical */
+  const status=marketStatus();const age=Q?(Date.now()-new Date(Q.quotes[sym].time).getTime())/60000:0;
+  const today=S.trades.filter(t=>new Date(t.t).toDateString()===new Date().toDateString()).length+1;
+  let a=0,at='';
+  if(today>=6){a=2;at=`This would be your ${today}th trade today. Slow down; frequent trading usually costs money.`}
+  else if(today>=3){a=1;at=`Your ${today}${today===3?'rd':'th'} trade today. A busy day.`}
+  if(status!=='open'){a=Math.max(a,1);at=(at?at+' ':'')+`The market is closed, so you would trade at the last price.`}
+  else if(age>45){a=Math.max(a,1);at=(at?at+' ':'')+`The price is ${Math.round(age)} minutes old.`}
+  if(!at)at=`Market is open. Prices can be up to 30 minutes old, so the real price may differ a little.`;
+  const eac={e:'&#9201;&#65039;',n:'Timing',role:'market and pace',l:a,t:at,d:`Quote time: ${fmtTime(Q.quotes[sym].time)} · trades today including this one: ${today}`};
+  return[minos,rad,eac];
+}
+const VERD=['Looks fine','Be careful','Warning'];
+function eldersHTML(list){return list.map(x=>`<div class="elder l${x.l}"><div class="em" aria-hidden="true">${x.e}</div><div class="stack" style="gap:2px"><div><span class="nm">${x.n}</span> <span class="cap">(${x.role})</span><span class="vd">${x.l===0?'&#10003;':x.l===1?'!':'&#10005;'} ${VERD[x.l]}</span></div><div class="tx">${esc(x.t)}</div><div class="dt">${esc(x.d)}</div></div></div>`).join('')}
+
+/* ---------- helpers ---------- */
+function marketStatus(){return Q?Q.market_status:'closed'}
+function fmtTime(iso){const d=new Date(iso);return isNaN(d)?'':d.toLocaleString([],{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}
+function fmtDate(t){return new Date(t).toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'})}
+function spark(vals,w,h,up,cls2){
+  if(!vals||vals.length<2)return'';
+  const mn=Math.min(...vals),mx=Math.max(...vals),rg=(mx-mn)||1;
+  const pts=vals.map((y,i)=>[i/(vals.length-1)*w,h-3-((y-mn)/rg)*(h-6)]);
+  const d=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const col=up?'var(--up)':'var(--dn)';
+  return `<svg class="${cls2||'spark'}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><path d="${d} L${w} ${h} L0 ${h} Z" fill="${col}" opacity=".12"/><path d="${d}" fill="none" stroke="${col}" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
+}
+function twoLine(h){ /* you vs VOO, indexed to 100 */
+  if(h.length<2||!S.vooStart)return'';
+  const a=h.map(x=>x.eq/S.start*100),b=h.map(x=>x.voo?x.voo/S.vooStart*100:null);
+  const all=a.concat(b.filter(x=>x!=null));const mn=Math.min(...all),mx=Math.max(...all),rg=(mx-mn)||1,W=300,H=90;
+  const line=(arr,col,dash)=>{const pts=arr.map((y,i)=>y==null?null:[i/(arr.length-1)*W,H-6-((y-mn)/rg)*(H-12)]).filter(Boolean);
+    return `<path d="${pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ')}" fill="none" stroke="${col}" stroke-width="2.5" ${dash?'stroke-dasharray="6 4"':''} vector-effect="non-scaling-stroke"/>`};
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Your account compared with VOO">${line(b,'var(--mut)',true)}${line(a,'var(--acc)',false)}</svg><div class="cap row" style="justify-content:flex-start;gap:16px"><span style="color:var(--acc)">&#9644; You</span><span>&#9548;&#9548; VOO (S&amp;P 500 fund)</span></div>`;
+}
+
+/* ---------- views ---------- */
+function posRow(r){
+  return `<button class="item" data-act="stock" data-sym="${r.sym}"><div class="left"><span class="sym">${r.sym}</span><span class="cap">${shfmt(r.qty)} shares &middot; bought at ${usd(r.avg)}</span><span class="cap">${r.stop?'Stop '+usd(r.stop):'No stop'}${r.tp?' &middot; Target '+usd(r.tp):''}</span></div>
+  <div class="right"><span class="med num">${usd(r.val)}</span><span class="${cls(r.pnl)} num">${arrow(r.pnl)}${sgn(r.pnl)} (${pc(r.pnlPct,1)})</span></div></button>`;
+}
+function viewHome(){
+  const v=valuation();let h='';
+  const ba=backupDue();
+  if(!storageOK)h+=`<div class="banner"><b>This browser is not saving your account.</b><span>Private browsing or blocked storage. Your practice account will be lost when you close the page. Use More &rarr; Backup often.</span></div>`;
+  if(ba)h+=`<div class="banner"><b>Time for a backup</b><span>${S.lastBackup?'It has been '+Math.floor((Date.now()-S.lastBackup)/DAY)+' days since your last backup.':'You have not made a backup yet.'} If Safari data is cleared, your practice account would be lost.</span><div class="btns"><button class="btn pri" data-act="backup">Back up now</button><button class="btn" data-act="snooze">Remind me tomorrow</button></div></div>`;
+  for(const n of S.notices)h+=`<div class="banner"><b>Automatic sale</b><span>${esc(n.text)}</span><div class="btns"><button class="btn" data-act="dismiss" data-t="${n.t}">OK</button></div></div>`;
+  if(QSTATE==='error')h+=`<div class="banner"><b>Could not get new prices.</b><span>Showing the last prices saved on this device${Q?' ('+fmtTime(Q.generated)+')':''}. Try Refresh in a minute.</span></div>`;
+  const vr=v.vooRet,ahead=vr!=null?v.totalPct-vr:null;
+  const left=`<div class="card"><div class="cap">Total account value</div><div class="big num">${usd(v.equity)}</div>
+   <div class="stats">
+    <div class="stat"><div class="cap">Today</div><div class="v num ${cls(v.day)}">${arrow(v.day)}${sgn(v.day)}</div></div>
+    <div class="stat"><div class="cap">Since you started</div><div class="v num ${cls(v.total)}">${arrow(v.total)}${sgn(v.total)}</div><div class="cap ${cls(v.total)}">${pc(v.totalPct)}</div></div>
+    <div class="stat"><div class="cap">Cash to spend</div><div class="v num">${usd(S.cash)}</div></div>
+    <div class="stat"><div class="cap">Stocks you hold</div><div class="v num">${usd(v.pv)}</div></div>
+   </div>
+   <div class="stack" style="margin-top:16px">${vr!=null?`<div><b>You vs VOO</b> <span class="cap">(a simple S&amp;P 500 fund, since ${fmtDate(new Date(S.startDay+'T12:00:00'))})</span></div>
+   <div>You: <b class="${cls(v.totalPct)}">${pc(v.totalPct)}</b> &nbsp; VOO: <b class="${cls(vr)}">${pc(vr)}</b> &nbsp; ${ahead>=0?'<b class="up">You are ahead by '+ahead.toFixed(2)+' points</b>':'<b class="dn">You are behind by '+Math.abs(ahead).toFixed(2)+' points</b>'}</div>`:'<div class="cap">Waiting for the first prices...</div>'}${twoLine(S.hist)}</div></div>`;
+  const pos=`<div class="card"><h2>What you hold</h2>${v.rows.length?v.rows.map(posRow).join(''):'<div class="cap">You do not hold any stocks yet. Open the Market tab, pick a company and tap Buy.</div>'}${v.rows.length?'':`<div class="btns" style="margin-top:12px"><button class="btn pri" data-act="tab" data-tab="market">Browse the market</button></div>`}</div>`;
+  const cc=councilCard();
+  return `${h?`<div class="col">${h}</div>`:''}<div class="grid two"><div class="col">${left}</div><div class="col">${pos}${cc}</div></div>`;
+}
+function councilCard(){
+  const calls=COUNCIL.slice(0,6);
+  return `<div class="card"><h2>The Advisor&rsquo;s latest calls</h2><div class="cap" style="margin:-8px 0 8px">Play money, not advice. An automated review of news and company filings writes these each night.</div>${calls.length?calls.map(c=>`<div class="item static" style="align-items:flex-start"><div class="left" style="white-space:normal"><span><span class="sym">${esc(c.ticker)}</span> <span class="tag ${c.action==='BUY'?'up':c.action==='SELL'?'dn':''}">${esc(c.action)}</span> <span class="cap">${esc(c.date)}</span></span><span style="font-size:16px;white-space:normal">${esc(c.reason)}</span></div></div>`).join(''):'<div class="cap">No calls published yet.</div>'}</div>`;
+}
+function viewMarket(){
+  if(!Q)return `<div class="card">${QSTATE==='loading'?'Loading prices...':'Prices could not be loaded. Tap Refresh.'}</div>`;
+  const f=(window._f||'').toLowerCase();
+  const rows=Object.entries(Q.quotes).filter(([s,q])=>!f||s.toLowerCase().includes(f)||q.name.toLowerCase().includes(f)).sort((a,b)=>a[0].localeCompare(b[0]));
+  return `<div class="card"><h2>Pick a company</h2><div class="field"><label class="l" for="srch">Search</label><input id="srch" type="search" placeholder="Name or symbol, for example Apple" value="${esc(window._f||'')}" autocomplete="off" autocapitalize="off"></div>
+  <div id="mlist" style="margin-top:12px">${marketRows(rows)}</div></div>`;
+}
+function marketRows(rows){
+  if(!rows.length)return'<div class="cap">Nothing matches that search.</div>';
+  return rows.map(([s,q])=>`<button class="item" data-act="stock" data-sym="${s}"><div class="left"><span class="sym">${s}</span><span class="cap">${esc(q.name)}</span></div>${spark(q.month,84,32,q.month[q.month.length-1]>=q.month[0])}<div class="right"><span class="med num">${usd(q.last)}</span><span class="pill ${q.chg_pct>0?'up':q.chg_pct<0?'dn':'flat'} num">${arrow(q.chg_pct)}${pc(q.chg_pct)}</span></div></button>`).join('');
+}
+function viewHistory(){
+  const t=[...S.trades].reverse();const sells=S.trades.filter(x=>x.side==='sell');
+  const w=sells.filter(x=>x.pnl>0).length;const real=sells.reduce((a,x)=>a+x.pnl,0);
+  const head=`<div class="card"><h2>Your trades</h2>${sells.length?`<div class="stats" style="margin-top:0"><div class="stat"><div class="cap">Finished trades</div><div class="v">${sells.length}</div></div><div class="stat"><div class="cap">Winners</div><div class="v up">${w}</div></div><div class="stat"><div class="cap">Losers</div><div class="v dn">${sells.length-w}</div></div><div class="stat"><div class="cap">Profit from sales</div><div class="v ${cls(real)}">${sgn(real)}</div></div></div>`:'<div class="cap">When you sell, the result shows here in green (win) or red (loss).</div>'}</div>`;
+  const list=t.length?`<div class="card">${t.map(x=>x.side==='buy'?`<div class="item static buyrow"><div class="left" style="white-space:normal"><span><span class="sym">${x.sym}</span> <span class="tag">BOUGHT</span></span><span class="cap">${shfmt(x.qty)} shares at ${usd(x.px)} &middot; ${fmtTime(x.t)}</span>${x.why?`<span style="font-size:16px">&ldquo;${esc(x.why)}&rdquo;</span>`:''}</div><div class="right"><span class="med num">${usd(x.qty*x.px)}</span></div></div>`
+   :`<div class="item static ${x.pnl>=0?'win':'loss'}"><div class="left" style="white-space:normal"><span><span class="sym">${x.sym}</span> <span class="tag ${x.pnl>=0?'up':'dn'}">${x.pnl>=0?'WIN':'LOSS'}</span> <span class="tag">${esc(x.reason)}</span></span><span class="cap">Sold ${shfmt(x.qty)} at ${usd(x.px)} (bought at ${usd(x.avg)}) &middot; ${fmtTime(x.t)}</span></div><div class="right"><span class="med num ${cls(x.pnl)}">${arrow(x.pnl)}${sgn(x.pnl)}</span><span class="${cls(x.pnl)}">${pc(x.pnlPct,1)}</span></div></div>`).join('')}</div>`:'<div class="card cap">No trades yet.</div>';
+  return head+list;
+}
+function scrollStats(){
+  const g=S.preds.filter(p=>p.status==='graded');if(!g.length)return null;
+  const n=g.length,hit=g.reduce((a,p)=>a+p.up,0)/n,avgc=g.reduce((a,p)=>a+p.conf,0)/n/100,brier=g.reduce((a,p)=>a+p.brier,0)/n;
+  const b=g.filter(p=>p.beat!=null);const beat=b.length?b.reduce((a,p)=>a+p.beat,0)/b.length:null;
+  const bk=[[50,59],[60,69],[70,79],[80,95]].map(([lo,hi])=>{const x=g.filter(p=>p.conf>=lo&&p.conf<=hi);return{lo,hi,n:x.length,hit:x.length?x.reduce((a,p)=>a+p.up,0)/x.length:null,avg:x.length?x.reduce((a,p)=>a+p.conf,0)/x.length/100:null}});
+  return{n,hit,avgc,brier,beat,bk};
+}
+function viewScroll(){
+  const st=scrollStats();const open=S.preds.filter(p=>p.status==='open');
+  let verdict='';
+  if(st){
+    if(st.n<5)verdict=`You need at least 5 finished predictions for a fair verdict. You have ${st.n}.`;
+    else{const d=st.avgc-st.hit;verdict=Math.abs(d)<0.08?'Your confidence matches your results well. That is a good sign.':d>0?`You were on average ${(st.avgc*100).toFixed(0)}% sure but right ${(st.hit*100).toFixed(0)}% of the time. You may be overconfident.`:`You were on average ${(st.avgc*100).toFixed(0)}% sure but right ${(st.hit*100).toFixed(0)}% of the time. You may be too modest.`}
+  }
+  const head=`<div class="card"><h2>&#127919; Your Track Record</h2><div class="cap" style="margin:-8px 0 12px">Every time you buy, you write down why and how sure you are. Later the page checks if you were right.</div>
+  ${st?`<div class="stats" style="margin-top:0"><div class="stat"><div class="cap">Predictions graded</div><div class="v">${st.n}</div></div><div class="stat"><div class="cap">Hit rate (went up)</div><div class="v">${(st.hit*100).toFixed(0)}%</div></div><div class="stat"><div class="cap">Brier score</div><div class="v">${st.brier.toFixed(3)}</div><div class="cap">lower is better</div></div><div class="stat"><div class="cap">Beat VOO</div><div class="v">${st.beat==null?'-':(st.beat*100).toFixed(0)+'%'}</div></div></div>
+  <p style="margin-top:12px"><b>${esc(verdict)}</b></p>
+  <p class="cap" style="margin-top:8px">Brier score: 0 is perfect. 0.25 is what you would get by always saying 50%. Below 0.25 means your confidence is useful.</p>`:'<p>No predictions have matured yet. They are graded automatically when their time is up.</p>'}</div>`;
+  const cal=st?`<div class="card"><h2>Were you sure when you were right?</h2><div class="cap" style="margin:-8px 0 12px">The bar shows how often you were right. The black mark shows how sure you said you were.</div>${st.bk.map(b=>`<div class="stack" style="margin-bottom:12px"><div class="row"><b>${b.lo}-${b.hi}% sure</b><span class="cap">${b.n?`${b.n} ${b.n===1?'prediction':'predictions'} &middot; right ${(b.hit*100).toFixed(0)}%`:'none yet'}</span></div><div class="bar" aria-hidden="true">${b.n?`<i style="width:${b.hit*100}%"></i><b style="left:calc(${b.avg*100}% - 1px)"></b>`:''}</div></div>`).join('')}</div>`:'';
+  const pend=`<div class="card"><h2>Waiting to be graded</h2>${open.length?[...open].reverse().map(p=>{const days=Math.max(0,Math.ceil((p.t+p.h*DAY-Date.now())/DAY));return`<div class="item static" style="align-items:flex-start"><div class="left" style="white-space:normal"><span><span class="sym">${p.sym}</span> <span class="tag">${p.conf}% sure it is higher in ${p.h} days</span></span><span style="font-size:16px">&ldquo;${esc(p.why)}&rdquo;</span><span class="cap">Bought at ${usd(p.entry)} on ${fmtDate(p.t)}</span></div><div class="right"><span class="med">${days===0?'Due':days}</span><span class="cap">${days===0?'next refresh':'days left'}</span></div></div>`}).join(''):'<div class="cap">Nothing waiting. Make a buy to write a new prediction.</div>'}</div>`;
+  const gr=S.preds.filter(p=>p.status==='graded');
+  const done=`<div class="card"><h2>Graded predictions</h2>${gr.length?[...gr].reverse().map(p=>`<div class="item static ${p.up?'win':'loss'}" style="align-items:flex-start"><div class="left" style="white-space:normal"><span><span class="sym">${p.sym}</span> <span class="tag ${p.up?'up':'dn'}">${p.up?'RIGHT':'WRONG'}</span> <span class="tag">${p.conf}% sure</span>${p.beat==null?'':` <span class="tag ${p.beat?'up':'dn'}">${p.beat?'beat VOO':'lagged VOO'}</span>`}</span><span style="font-size:16px">&ldquo;${esc(p.why)}&rdquo;</span><span class="cap">${usd(p.entry)} &rarr; ${usd(p.exit)} after ${p.h} days${p.vret==null?'':' &middot; VOO '+pc(p.vret,1)}</span></div><div class="right"><span class="med ${cls(p.ret)}">${pc(p.ret,1)}</span><span class="cap">Brier ${p.brier.toFixed(2)}</span></div></div>`).join(''):'<div class="cap">None yet.</div>'}</div>`;
+  return `<div class="grid two"><div class="col">${head}${cal}</div><div class="col">${pend}${done}</div></div>`;
+}
+function viewMore(){
+  return `<div class="grid two"><div class="col"><div class="card"><h2>How this works</h2><ol class="help">
+  <li><b>It is practice money.</b> You start with $100,000 of pretend cash. Nothing here is real and nothing is connected to a bank or broker.</li>
+  <li><b>Pick a company</b> in the Market tab and tap Buy. You can enter dollars or a number of shares, even a fraction of a share.</li>
+  <li><b>The Advisor checks every buy</b>: the risk (how much of your money is in one stock and whether you set a stop-loss), the price move (are you chasing a big jump?), and the timing (is the market open, are you trading too often). It only advises. You always decide.</li>
+  <li><b>Write why you are buying</b> and how sure you are. Later the Record tab checks if you were right, so you learn how good your confidence is.</li>
+  <li><b>Stop-loss</b> sells automatically if the price falls to your limit. <b>Take-profit</b> sells if it rises to your target. They are checked each time the page loads new prices, so the sale happens at the newest price, which can be a little past your limit.</li>
+  <li><b>Prices are delayed</b> by up to about 30 minutes and update a few times a day. Trades happen at the price you see, plus a tiny 0.05% cost.</li>
+  <li><b>Your account lives on this device, and a copy is saved automatically.</b> Your trades, reasons and results are also sent to a shared record so we can review them together. Still make a Backup now and then.</li></ol></div></div>
+  <div class="col"><div class="card"><h2>Saved automatically</h2><p class="cap">Your trades, reasons and results are saved automatically to a shared record that Dad and Chris both use, so we can review them together each month.</p><p style="margin-top:8px" id="syncline">${syncLine()}</p></div><div class="card"><h2>Backup and restore</h2><p class="cap" style="margin-bottom:12px">${S.lastBackup?'Last backup: '+fmtDate(S.lastBackup):'No backup yet.'}</p><div class="btns"><button class="btn pri" data-act="backup">Back up</button><button class="btn" data-act="restore">Restore from backup</button></div></div>
+  <div class="card"><h2>Start over</h2><p class="cap" style="margin-bottom:12px">Erases your trades and gives you a fresh $100,000.</p><button class="btn sell" data-act="reset">Reset account</button></div>
+  <div class="card cap">Practice Trader &middot; practice money only &middot; not investment advice. The Council&rsquo;s calls are experiments.</div></div></div>`;
+}
+const TABS=[['home','&#127968;','Home'],['market','&#128200;','Market'],['history','&#129534;','History'],['scroll','&#127919;','Record'],['more','&#9881;&#65039;','More']];
+function render(){
+  if(!S)return;
+  $('#nav').innerHTML=TABS.map(([k,i,l])=>`<button data-act="tab" data-tab="${k}" ${tab===k?'aria-current="page"':''}><span class="ic" aria-hidden="true">${i}</span>${l}</button>`).join('');
+  const ms=marketStatus();const lbl={open:'Market open',premarket:'Before market opens',afterhours:'After hours',closed:'Market closed'}[ms]||ms;
+  $('#mkt').textContent=lbl;$('#mkt').className='badge '+(ms==='open'?'open':'');
+  $('#age').textContent=Q?`Prices delayed up to ~30 min${ms!=='open'?' (market closed: last price)':''}. Updated ${fmtTime(Q.generated)}.`:'Prices delayed up to ~30 min.';
+  const v={home:viewHome,market:viewMarket,history:viewHistory,scroll:viewScroll,more:viewMore}[tab]();
+  const keep=document.activeElement&&document.activeElement.id==='srch';
+  $('#main').innerHTML=v;
+  if(keep){const s=$('#srch');s.focus();s.setSelectionRange(s.value.length,s.value.length)}
+}
+
+/* ---------- sheets ---------- */
+function openSheet(html,kind){sheetKind=kind||null;$('#panel').innerHTML=html;$('#sheet').hidden=false;document.body.classList.add('lock');$('#panel').scrollTop=0}
+function closeSheet(){$('#sheet').hidden=true;document.body.classList.remove('lock');sheetKind=null}
+const head=(t)=>`<div class="ph"><h2>${t}</h2><button class="btn" data-act="close" aria-label="Close">&#10005; Close</button></div><div><span class="practice">Practice money &middot; not real</span></div>`;
+function stockSheet(sym){
+  const q=qd(sym);if(!q)return;const p=S.pos[sym];const cs=councilFor(sym).slice(0,2);
+  const up=q.month[q.month.length-1]>=q.month[0];
+  openSheet(`${head(esc(q.name)+' <span class="mut">('+sym+')</span>')}
+  <div class="card"><div class="row"><span class="big num">${usd(q.last)}</span><span class="pill ${q.chg_pct>0?'up':q.chg_pct<0?'dn':'flat'} num" style="font-size:18px">${arrow(q.chg_pct)}${pc(q.chg_pct)}</span></div>
+  <div class="cap">Yesterday's close ${usd(q.prev_close)} &middot; price time ${fmtTime(q.time)}${marketStatus()!=='open'?' &middot; market closed, last price':''}</div>
+  <div class="cap" style="margin-top:12px">Last month</div>${spark(q.month,300,100,up,'chart')}
+  ${q.spark.length>2?`<div class="cap" style="margin-top:8px">Latest trading day</div>${spark(q.spark,300,60,q.spark[q.spark.length-1]>=q.spark[0],'chart')}`:''}</div>
+  ${p?`<div class="card"><div class="row"><b>You hold ${shfmt(p.qty)} shares</b><b class="${cls(p.qty*(q.last-p.avg))}">${sgn(p.qty*(q.last-p.avg))}</b></div><div class="cap">Bought at ${usd(p.avg)} &middot; ${p.stop?'Stop '+usd(p.stop):'no stop'}${p.tp?' &middot; target '+usd(p.tp):''}</div></div>`:''}
+  ${cs.length?`<div class="card"><div class="cap">Council (play money, not advice)</div>${cs.map(c=>`<div><b>${esc(c.action)}</b> <span class="cap">${esc(c.date)}</span> ${esc(c.reason)}</div>`).join('')}</div>`:''}
+  <div class="btns"><button class="btn pri" data-act="buy" data-sym="${sym}">Buy ${sym}</button>${p?`<button class="btn sell" data-act="sell" data-sym="${sym}">Sell / manage</button>`:''}</div>`,'stock');
+}
+let BF=null;
+function buySheet(sym){
+  const q=qd(sym);const v=valuation();
+  BF={sym,mode:'usd',amt:'',stop:10,tp:null,conf:60,h:5,why:''};
+  openSheet(`${head('Buy '+sym)}
+  <div class="row"><div><div class="sym">${esc(q.name)}</div><div class="cap">Price ${usd(q.last)} &middot; you have ${usd(S.cash)} cash</div></div></div>
+  <div class="field"><div class="seg"><button class="chip" data-act="mode" data-m="usd" aria-pressed="true">Dollars</button><button class="chip" data-act="mode" data-m="sh" aria-pressed="false">Shares</button></div>
+   <label class="l" for="amt" id="amtl">How many dollars?</label><input id="amt" type="number" inputmode="decimal" min="0" step="any" placeholder="0">
+   <div class="chips" id="amtchips">${[1000,5000,10000,25000].map(x=>`<button class="chip" data-act="amt" data-v="${x}">$${x.toLocaleString()}</button>`).join('')}</div></div>
+  <div class="field"><label class="l">Stop-loss <span class="cap">(sell automatically if it falls this much)</span></label><div class="chips" id="stopchips">${[[null,'None'],[5,'5%'],[10,'10%'],[15,'15%']].map(([x,l])=>`<button class="chip" data-act="stop" data-v="${x}" aria-pressed="${x===10}">${l}</button>`).join('')}</div></div>
+  <div class="field"><label class="l">Take-profit <span class="cap">(sell automatically if it rises this much)</span></label><div class="chips" id="tpchips">${[[null,'None'],[10,'10%'],[20,'20%'],[30,'30%']].map(([x,l])=>`<button class="chip" data-act="tp" data-v="${x}" aria-pressed="${x===null}">${l}</button>`).join('')}</div></div>
+  <div class="card" id="est"></div>
+  <div><div class="cap" style="margin-bottom:8px">The Advisor&rsquo;s check before you buy (advice only, you decide)</div><div class="stack" id="elders"></div></div>
+  <div class="field"><label class="l" for="why">Why are you buying?</label><textarea id="why" placeholder="For example: strong earnings and I like their new product"></textarea></div>
+  <div class="field"><label class="l" for="conf">How sure are you it will be higher in <span id="hl">5</span> days? <span id="cv" style="color:var(--acc)">60%</span></label><input id="conf" type="range" min="50" max="95" step="5" value="60"><div class="cap">50% = coin flip &middot; 95% = almost certain</div></div>
+  <div class="field"><label class="l">Check back after</label><div class="chips" id="hchips">${[1,3,5,10].map(x=>`<button class="chip" data-act="hor" data-v="${x}" aria-pressed="${x===5}">${x} ${x===1?'day':'days'}</button>`).join('')}</div></div>
+  <div class="err" id="berr" role="alert"></div>
+  <div class="btns"><button class="btn ghost" data-act="close">Cancel</button><button class="btn pri" data-act="confirmbuy" id="cbtn">Buy now</button></div>`,'buy');
+  updateBuy();
+}
+function buyCalc(){
+  const q=qd(BF.sym);const px=fillBuy(q.last);const n=parseFloat(BF.amt)||0;
+  const shares=BF.mode==='usd'?Math.floor(n/px*10000)/10000:Math.floor(n*10000)/10000;
+  return{px,shares,cost:shares*px,fee:shares*(px-q.last)};
+}
+function updateBuy(){
+  if(!BF)return;const c=buyCalc(),q=qd(BF.sym),v=valuation();
+  $('#est').innerHTML=c.shares>0?`<div class="row"><span>You get</span><b class="num">${shfmt(c.shares)} shares</b></div><div class="row"><span>Price you pay</span><b class="num">${usd(c.px,4)}</b></div><div class="cap">Latest price ${usd(q.last)} + 0.05% trading cost (${usd(c.fee)} in total)</div><div class="row"><span>Total cost</span><b class="num med">${usd(c.cost)}</b></div>`:'<div class="cap">Enter an amount to see the cost.</div>';
+  $('#elders').innerHTML=eldersHTML(elders(BF.sym,c.cost,BF.stop,v));
+  $('#hl').textContent=BF.h;$('#cv').textContent=BF.conf+'%';
+}
+function setPressed(box,val){document.querySelectorAll('#'+box+' .chip').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===String(val))))}
+function confirmBuy(){
+  const c=buyCalc();const why=$('#why').value.trim();
+  if(!(c.shares>0)){$('#berr').textContent='Please enter how much you want to buy.';return}
+  if(c.cost>S.cash+0.005){$('#berr').textContent='That is more than your cash of '+usd(S.cash)+'.';return}
+  if(why.length<3){$('#berr').textContent='Please write why you are buying. It is how you learn.';$('#why').focus();return}
+  BF.why=why;
+  let adv=null,eqNow=null;try{const v0=valuation();eqNow=Math.round(v0.equity*100)/100;const el=elders(BF.sym,c.cost,BF.stop,v0);adv={risk:{l:el[0].l,t:el[0].t},price:{l:el[1].l,t:el[1].t},timing:{l:el[2].l,t:el[2].t}}}catch(e){}
+  const err=doBuy({sym:BF.sym,shares:c.shares,stopPct:BF.stop,tpPct:BF.tp,why,conf:BF.conf,horizon:BF.h,adv,eq:eqNow});
+  if(err){$('#berr').textContent=err;return}
+  const s=BF.sym;BF=null;closeSheet();toast(`Bought ${shfmt(c.shares)} ${s} for ${usd(c.cost)}`);snapshotDay();render();
+}
+let SF=null;
+function sellSheet(sym){
+  const p=S.pos[sym],q=qd(sym);if(!p||!q)return;SF={sym,pct:100,stop:undefined,tp:undefined};
+  const px=fillSell(q.last);
+  openSheet(`${head('Sell '+sym)}
+  <div class="card"><div class="row"><span>You hold</span><b>${shfmt(p.qty)} shares</b></div><div class="row"><span>Bought at</span><b class="num">${usd(p.avg)}</b></div><div class="row"><span>Now</span><b class="num">${usd(q.last)}</b></div><div class="row"><span>Your result if sold</span><b class="num ${cls(p.qty*(px-p.avg))}" id="sres"></b></div></div>
+  <div class="field"><label class="l">How much to sell?</label><div class="chips" id="spchips">${[25,50,75,100].map(x=>`<button class="chip" data-act="spct" data-v="${x}" aria-pressed="${x===100}">${x}%</button>`).join('')}</div></div>
+  <div class="btns"><button class="btn sell" data-act="confirmsell">Sell now</button></div>
+  <div class="card stack"><b>Change your protection</b><div class="cap">Stop-loss, measured from today's price</div><div class="chips" id="sstop">${[[null,'Off'],[5,'5%'],[10,'10%'],[15,'15%']].map(([x,l])=>`<button class="chip" data-act="sstop" data-v="${x}" aria-pressed="false">${l}</button>`).join('')}</div>
+  <div class="cap">Take-profit, measured from today's price</div><div class="chips" id="stp">${[[null,'Off'],[10,'10%'],[20,'20%'],[30,'30%']].map(([x,l])=>`<button class="chip" data-act="stp" data-v="${x}" aria-pressed="false">${l}</button>`).join('')}</div>
+  <div class="cap">Now: ${p.stop?'stop '+usd(p.stop):'no stop'}${p.tp?' &middot; target '+usd(p.tp):' &middot; no target'}</div>
+  <button class="btn" data-act="saveprot">Save protection</button></div>`,'sell');
+  updateSell();
+}
+function updateSell(){const p=S.pos[SF.sym],q=qd(SF.sym);const qty=p.qty*SF.pct/100;$('#sres').textContent=sgn(qty*(fillSell(q.last)-p.avg))+' for '+shfmt(qty)+' shares'}
+function backupCode(){return btoa(unescape(encodeURIComponent(JSON.stringify(S))))}
+function backupSheet(){
+  S.lastBackup=Date.now();S.snooze=0;save();
+  const code=backupCode();
+  openSheet(`${head('Backup')}<p>Copy this code and keep it somewhere safe (Notes, email to yourself). To restore, paste it back in More &rarr; Restore.</p>
+  <pre class="code" id="bcode">${esc(code)}</pre>
+  <div class="btns"><button class="btn pri" data-act="copycode">Copy code</button><button class="btn" data-act="dlcode">Save as file</button></div><div class="cap" id="bmsg"></div>`,'backup');
+}
+function restoreSheet(){
+  openSheet(`${head('Restore')}<p>Paste your backup code below, or choose a backup file. <b>This replaces what is on this device now.</b></p>
+  <textarea id="rcode" placeholder="Paste backup code here" style="min-height:120px"></textarea><div class="field"><label class="l" for="rfile">Or choose a file</label><input type="file" id="rfile" accept=".json,.txt,application/json,text/plain"></div>
+  <div class="err" id="rerr" role="alert"></div><div class="btns"><button class="btn ghost" data-act="close">Cancel</button><button class="btn pri" data-act="doRestore">Restore</button></div>`,'restore');
+}
+function parseBackup(txt){
+  txt=txt.trim();let o;
+  try{o=JSON.parse(txt)}catch(e){try{o=JSON.parse(decodeURIComponent(escape(atob(txt.replace(/\s+/g,'')))))}catch(e2){return null}}
+  if(!o||o.v!==1||typeof o.cash!=='number'||typeof o.pos!=='object'||!Array.isArray(o.trades)||!Array.isArray(o.preds))return null;
+  return o;
+}
+function backupDue(){const ref=S.lastBackup||S.created;if(Date.now()<S.snooze)return false;if(!S.lastBackup&&!S.trades.length)return false;return Date.now()-ref>(syncConnected()?30:7)*DAY}
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b){if(e.target.id==='sheet'&&sheetKind!=='buy')closeSheet();return}
+  const a=b.dataset.act,d=b.dataset;
+  switch(a){
+    case'tab':tab=d.tab;closeSheet();render();window.scrollTo(0,0);break;
+    case'refresh':fetchAll(true);break;
+    case'stock':stockSheet(d.sym);break;
+    case'buy':buySheet(d.sym);break;
+    case'sell':sellSheet(d.sym);break;
+    case'close':closeSheet();BF=null;SF=null;break;
+    case'mode':BF.mode=d.m;document.querySelectorAll('[data-act=mode]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));$('#amtl').textContent=d.m==='usd'?'How many dollars?':'How many shares?';$('#amtchips').hidden=d.m!=='usd';updateBuy();break;
+    case'amt':$('#amt').value=d.v;BF.amt=d.v;updateBuy();break;
+    case'stop':BF.stop=d.v==='null'?null:+d.v;setPressed('stopchips',d.v);updateBuy();break;
+    case'tp':BF.tp=d.v==='null'?null:+d.v;setPressed('tpchips',d.v);updateBuy();break;
+    case'hor':BF.h=+d.v;setPressed('hchips',d.v);updateBuy();break;
+    case'confirmbuy':confirmBuy();break;
+    case'spct':SF.pct=+d.v;setPressed('spchips',d.v);updateSell();break;
+    case'sstop':SF.stop=d.v==='null'?null:+d.v;setPressed('sstop',d.v);break;
+    case'stp':SF.tp=d.v==='null'?null:+d.v;setPressed('stp',d.v);break;
+    case'saveprot':{const p=S.pos[SF.sym],q=qd(SF.sym);if(SF.stop!==undefined)p.stop=SF.stop?q.last*(1-SF.stop/100):null;if(SF.tp!==undefined)p.tp=SF.tp?q.last*(1+SF.tp/100):null;save();toast('Protection saved');closeSheet();render();break}
+    case'confirmsell':{const p=S.pos[SF.sym];const qty=p.qty*SF.pct/100;const s=SF.sym;const err=doSell(s,SF.pct===100?p.qty:qty,'sold by you');if(err){toast(err);break}closeSheet();toast('Sold '+s);snapshotDay();render();break}
+    case'backup':backupSheet();render();break;
+    case'snooze':S.snooze=Date.now()+DAY;save();render();break;
+    case'dismiss':S.notices=S.notices.filter(n=>String(n.t)!==d.t);save();render();break;
+    case'copycode':{const t=backupCode();(navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(t):Promise.reject()).then(()=>$('#bmsg').textContent='Copied.').catch(()=>{const r=document.createRange();r.selectNodeContents($('#bcode'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('#bmsg').textContent='Code selected. Tap Copy in the pop-up that appears.'});break}
+    case'dlcode':{try{const bl=new Blob([JSON.stringify(S)],{type:'application/json'});const u=URL.createObjectURL(bl);const l=document.createElement('a');l.href=u;l.download='practice-trader-backup-'+new Date().toISOString().slice(0,10)+'.json';document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);$('#bmsg').textContent='File saved (check your Files or Downloads).'}catch(err){$('#bmsg').textContent='Could not save a file. Use Copy code instead.'}break}
+    case'restore':restoreSheet();break;
+    case'doRestore':{const o=parseBackup($('#rcode').value);if(!o){$('#rerr').textContent='That does not look like a valid backup.';break}S=o;save();snapshotDay();checkTriggers();gradePreds();closeSheet();toast('Backup restored');render();break}
+    case'reset':openSheet(`${head('Reset account?')}<p>This erases your trades and starts again with $100,000. It cannot be undone, unless you made a backup first.</p><div class="btns"><button class="btn" data-act="backup">Back up first</button><button class="btn ghost" data-act="close">Cancel</button><button class="btn sell" data-act="doReset">Yes, erase and start over</button></div>`,'reset');break;
+    case'doReset':S=newState();if(Q&&qd('VOO'))S.vooStart=qd('VOO').last;save();snapshotDay();closeSheet();tab='home';render();toast('Account reset');break;
+  }
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='srch'){window._f=t.value;const f=t.value.toLowerCase();const rows=Object.entries(Q.quotes).filter(([s,q])=>!f||s.toLowerCase().includes(f)||q.name.toLowerCase().includes(f)).sort((a,b)=>a[0].localeCompare(b[0]));$('#mlist').innerHTML=marketRows(rows)}
+  else if(t.id==='amt'&&BF){BF.amt=t.value;updateBuy()}
+  else if(t.id==='conf'&&BF){BF.conf=+t.value;updateBuy()}
+  else if(t.id==='why'){$('#berr').textContent=''}
+});
+document.addEventListener('change',e=>{
+  if(e.target.id==='rfile'&&e.target.files[0]){const r=new FileReader();r.onload=()=>{$('#rcode').value=String(r.result)};r.readAsText(e.target.files[0])}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#sheet').hidden)closeSheet()});
+
+/* ---------- data ---------- */
+async function getJSON(u){const r=await fetch(u+'?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw new Error(r.status);return r.json()}
+async function fetchAll(manual){
+  const btn=$('#refresh');if(manual){btn.disabled=true;btn.textContent='...'}
+  try{
+    const q=await getJSON('quotes.json');Q=q;QSTATE='ok';lsSet(PFX+'quotes',JSON.stringify(q));
+  }catch(e){QSTATE='error';if(!Q){try{const c=lsGet(PFX+'quotes');if(c)Q=JSON.parse(c)}catch(_){}}}
+  try{const c=await getJSON('council.json');COUNCIL=(c.calls||[]);lsSet(PFX+'council',JSON.stringify(COUNCIL))}catch(e){if(!COUNCIL.length){try{COUNCIL=JSON.parse(lsGet(PFX+'council')||'[]')}catch(_){}}}
+  if(manual){btn.disabled=false;btn.innerHTML='&#8635; Refresh'}
+  afterData();
+  if(manual)toast(QSTATE==='ok'?'Prices updated':'Could not reach the price feed');
+}
+function afterData(){
+  if(Q&&S){
+    if(S.vooStart==null&&qd('VOO'))S.vooStart=qd('VOO').last;
+    snapshotDay();checkTriggers();gradePreds();snapshotDay();save();
+  }
+  if(sheetKind==='buy')updateBuy();else if(sheetKind==null||sheetKind==='stock')render();
+  if(sheetKind==null)render();
+}
+/* ---------- automatic save to the shared record (Google Sheet) ---------- */
+function deviceId(){let d=lsGet(PFX+'device');if(!d){d='d'+Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);lsSet(PFX+'device',d)}return d}
+function syncConnected(){return !!SYNC_URL&&!!S&&S.lastSyncOk>0&&Date.now()-S.lastSyncOk<7*DAY}
+function syncLine(){
+  if(!SYNC_URL)return'Not switched on yet.';
+  if(!S||!S.lastSyncOk)return'Last saved: not yet'+(S&&S.lastSyncAttempt?' (trying again soon)':'')+'.';
+  return'Last saved: '+fmtTime(new Date(S.lastSyncOk).toISOString())+'.';
+}
+function stateSig(){const {lastSyncAttempt,lastSyncOk,...rest}=S;return JSON.stringify(rest)}
+let syncTimer=null,syncBusy=false,lastSentSig=null;
+function scheduleSync(){if(!SYNC_URL||!S)return;if(stateSig()===lastSentSig)return;clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncNow(false),3000)}
+function buildPayload(){
+  const names={};for(const t of S.trades){const q=qd(t.sym);if(q&&q.name)names[t.sym]=q.name}
+  for(const s of Object.keys(S.pos)){const q=qd(s);if(q&&q.name)names[s]=q.name}
+  let summary=null;
+  try{const v=valuation();const d=(qd('VOO')||{}).day||new Date().toISOString().slice(0,10);
+    summary={date:d,equity:v.equity,cash:S.cash,invested:v.pv,totalPct:v.totalPct,vooPct:v.vooRet,positions:v.rows.map(r=>({sym:r.sym,qty:r.qty,avg:r.avg,last:r.last,val:r.val,pnlPct:r.pnlPct}))}}catch(e){}
+  return{k:SYNC_KEY,player:PLAYER,device:deviceId(),sent_at:new Date().toISOString(),app_version:APP_VERSION,state:S,names,summary};
+}
+async function syncNow(force){
+  if(!SYNC_URL||!S)return;
+  if(syncBusy)return;
+  if(!force&&stateSig()===lastSentSig&&S.lastSyncOk&&Date.now()-S.lastSyncOk<9*60*1000)return;
+  syncBusy=true;S.lastSyncAttempt=Date.now();saveQuiet();
+  const sig=stateSig();
+  try{
+    await fetch(SYNC_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(buildPayload())});
+    /* no-cors: the reply cannot be read; getting here means the request left the device */
+    lastSentSig=sig;S.lastSyncOk=Date.now();saveQuiet();
+  }catch(e){/* offline: try again at the next trigger */}
+  syncBusy=false;
+  const el=document.getElementById('syncline');if(el)el.textContent=syncLine();
+}
+function startSync(){
+  if(!SYNC_URL)return;
+  syncNow(true);
+  setInterval(()=>{if(!document.hidden)syncNow(true)},10*60*1000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncNow(true)});
+  window.addEventListener('online',()=>syncNow(true));
+}
+function init(){
+  S=load()||newState();
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+  const c=lsGet(PFX+'quotes');if(c){try{Q=JSON.parse(c)}catch(e){}}
+  try{COUNCIL=JSON.parse(lsGet(PFX+'council')||'[]')}catch(e){}
+  render();save();fetchAll(false);startSync();
+  setInterval(()=>{if(!document.hidden)fetchAll(false)},5*60*1000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)fetchAll(false)});
+  if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+init();
+</script>
+</body>
+</html>

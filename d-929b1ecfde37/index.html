@@ -129,7 +129,10 @@ a{color:var(--acc)}
 <noscript><main><div class="card">This page needs JavaScript.</div></main></noscript>
 <script>
 'use strict';
-const KEY='pt_dad_v1', START_CASH=100000, SLIP=0.0005;
+const PLAYER='Dad', PFX='pt_dad_', KEY=PFX+'v1', START_CASH=100000, SLIP=0.0005;
+const SYNC_URL='';
+const SYNC_KEY='w-ht1VA79svBoVoGmN';
+const APP_VERSION='practice-1';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const usd=(n,d=2)=>(n<0?'-':'')+'$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
@@ -146,7 +149,8 @@ function lsGet(k){try{return localStorage.getItem(k)}catch(e){storageOK=false;re
 function lsSet(k,v){try{localStorage.setItem(k,v);return true}catch(e){storageOK=false;return false}}
 function newState(){return{v:1,created:Date.now(),startDay:new Date().toISOString().slice(0,10),cash:START_CASH,start:START_CASH,vooStart:null,pos:{},trades:[],preds:[],hist:[],dayBase:null,notices:[],lastBackup:0,snooze:0}}
 function load(){const r=lsGet(KEY);if(r){try{const o=JSON.parse(r);if(o&&o.v===1){if((o.start||0)<START_CASH&&!(o.trades||[]).length&&!Object.keys(o.pos||{}).length){o.cash=START_CASH;o.start=START_CASH;o.dayBase=null;o.hist=[];lsSet(KEY,JSON.stringify(o))}return o}}catch(e){}}return memCopy?JSON.parse(memCopy):null}
-function save(){const j=JSON.stringify(S);memCopy=j;lsSet(KEY,j)}
+function save(){const j=JSON.stringify(S);memCopy=j;lsSet(KEY,j);scheduleSync()}
+function saveQuiet(){const j=JSON.stringify(S);memCopy=j;lsSet(KEY,j)}
 
 /* ---------- quotes / valuation ---------- */
 const qd=sym=>Q&&Q.quotes[sym];
@@ -183,6 +187,7 @@ function snapshotDay(){
 /* ---------- trading ---------- */
 function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,3500)}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function equityNow(){try{return Math.round(valuation().equity*100)/100}catch(e){return null}}
 function doBuy(o){
   const q=qd(o.sym);if(!q)return'No price available.';
   const px=fillBuy(q.last);const shares=Math.floor(o.shares*10000)/10000;
@@ -192,9 +197,10 @@ function doBuy(o){
   p.avg=(p.qty*p.avg+cost)/(p.qty+shares);p.qty+=shares;
   if(o.stopPct)p.stop=px*(1-o.stopPct/100);if(o.tpPct)p.tp=px*(1+o.tpPct/100);
   S.pos[o.sym]=p;S.cash-=cost;
-  S.trades.push({id:uid(),t:Date.now(),sym:o.sym,side:'buy',qty:shares,px,why:o.why});
+  const tid=uid();
+  S.trades.push({id:tid,t:Date.now(),sym:o.sym,side:'buy',qty:shares,px,why:o.why,conf:o.conf,h:o.horizon,stopPct:o.stopPct||null,tpPct:o.tpPct||null,adv:o.adv||null,eq:o.eq!=null?o.eq:null});
   const voo=qd('VOO');
-  S.preds.push({id:uid(),t:Date.now(),sym:o.sym,entry:px,voo:voo?voo.last:null,conf:o.conf,h:o.horizon,why:o.why,status:'open'});
+  S.preds.push({id:uid(),tid,t:Date.now(),sym:o.sym,entry:px,voo:voo?voo.last:null,conf:o.conf,h:o.horizon,why:o.why,status:'open'});
   save();return null;
 }
 function doSell(sym,qty,reason){
@@ -202,7 +208,7 @@ function doSell(sym,qty,reason){
   qty=Math.min(qty,p.qty);if(!(qty>0))return'Enter an amount first.';
   const px=fillSell(q.last);const pnl=(px-p.avg)*qty;
   S.cash+=qty*px;p.qty-=qty;
-  S.trades.push({id:uid(),t:Date.now(),sym,side:'sell',qty,px,avg:p.avg,pnl,pnlPct:(px/p.avg-1)*100,reason:reason||'sold by you'});
+  S.trades.push({id:uid(),t:Date.now(),sym,side:'sell',qty,px,avg:p.avg,pnl,pnlPct:(px/p.avg-1)*100,reason:reason||'sold by you',eq:equityNow()});
   if(p.qty<1e-6){delete S.pos[sym]}
   save();return null;
 }
@@ -385,8 +391,8 @@ function viewMore(){
   <li><b>Write why you are buying</b> and how sure you are. Later the Record tab checks if you were right, so you learn how good your confidence is.</li>
   <li><b>Stop-loss</b> sells automatically if the price falls to your limit. <b>Take-profit</b> sells if it rises to your target. They are checked each time the page loads new prices, so the sale happens at the newest price, which can be a little past your limit.</li>
   <li><b>Prices are delayed</b> by up to about 30 minutes and update a few times a day. Trades happen at the price you see, plus a tiny 0.05% cost.</li>
-  <li><b>Your account lives on this device only.</b> If Safari data is cleared it disappears, so make a Backup now and then.</li></ol></div></div>
-  <div class="col"><div class="card"><h2>Backup and restore</h2><p class="cap" style="margin-bottom:12px">${S.lastBackup?'Last backup: '+fmtDate(S.lastBackup):'No backup yet.'}</p><div class="btns"><button class="btn pri" data-act="backup">Back up</button><button class="btn" data-act="restore">Restore from backup</button></div></div>
+  <li><b>Your account lives on this device, and a copy is saved automatically.</b> Your trades, reasons and results are also sent to a shared record so we can review them together. Still make a Backup now and then.</li></ol></div></div>
+  <div class="col"><div class="card"><h2>Saved automatically</h2><p class="cap">Your trades, reasons and results are saved automatically to a shared record that Dad and Chris both use, so we can review them together each month.</p><p style="margin-top:8px" id="syncline">${syncLine()}</p></div><div class="card"><h2>Backup and restore</h2><p class="cap" style="margin-bottom:12px">${S.lastBackup?'Last backup: '+fmtDate(S.lastBackup):'No backup yet.'}</p><div class="btns"><button class="btn pri" data-act="backup">Back up</button><button class="btn" data-act="restore">Restore from backup</button></div></div>
   <div class="card"><h2>Start over</h2><p class="cap" style="margin-bottom:12px">Erases your trades and gives you a fresh $100,000.</p><button class="btn sell" data-act="reset">Reset account</button></div>
   <div class="card cap">Practice Trader &middot; practice money only &middot; not investment advice. The Council&rsquo;s calls are experiments.</div></div></div>`;
 }
@@ -457,7 +463,8 @@ function confirmBuy(){
   if(c.cost>S.cash+0.005){$('#berr').textContent='That is more than your cash of '+usd(S.cash)+'.';return}
   if(why.length<3){$('#berr').textContent='Please write why you are buying. It is how you learn.';$('#why').focus();return}
   BF.why=why;
-  const err=doBuy({sym:BF.sym,shares:c.shares,stopPct:BF.stop,tpPct:BF.tp,why,conf:BF.conf,horizon:BF.h});
+  let adv=null,eqNow=null;try{const v0=valuation();eqNow=Math.round(v0.equity*100)/100;const el=elders(BF.sym,c.cost,BF.stop,v0);adv={risk:{l:el[0].l,t:el[0].t},price:{l:el[1].l,t:el[1].t},timing:{l:el[2].l,t:el[2].t}}}catch(e){}
+  const err=doBuy({sym:BF.sym,shares:c.shares,stopPct:BF.stop,tpPct:BF.tp,why,conf:BF.conf,horizon:BF.h,adv,eq:eqNow});
   if(err){$('#berr').textContent=err;return}
   const s=BF.sym;BF=null;closeSheet();toast(`Bought ${shfmt(c.shares)} ${s} for ${usd(c.cost)}`);snapshotDay();render();
 }
@@ -495,7 +502,7 @@ function parseBackup(txt){
   if(!o||o.v!==1||typeof o.cash!=='number'||typeof o.pos!=='object'||!Array.isArray(o.trades)||!Array.isArray(o.preds))return null;
   return o;
 }
-function backupDue(){const ref=S.lastBackup||S.created;if(Date.now()<S.snooze)return false;if(!S.lastBackup&&!S.trades.length)return false;return Date.now()-ref>7*DAY}
+function backupDue(){const ref=S.lastBackup||S.created;if(Date.now()<S.snooze)return false;if(!S.lastBackup&&!S.trades.length)return false;return Date.now()-ref>(syncConnected()?30:7)*DAY}
 
 /* ---------- events ---------- */
 document.addEventListener('click',e=>{
@@ -547,9 +554,9 @@ async function getJSON(u){const r=await fetch(u+'?t='+Date.now(),{cache:'no-stor
 async function fetchAll(manual){
   const btn=$('#refresh');if(manual){btn.disabled=true;btn.textContent='...'}
   try{
-    const q=await getJSON('quotes.json');Q=q;QSTATE='ok';lsSet('pt_dad_quotes',JSON.stringify(q));
-  }catch(e){QSTATE='error';if(!Q){try{const c=lsGet('pt_dad_quotes');if(c)Q=JSON.parse(c)}catch(_){}}}
-  try{const c=await getJSON('council.json');COUNCIL=(c.calls||[]);lsSet('pt_dad_council',JSON.stringify(COUNCIL))}catch(e){if(!COUNCIL.length){try{COUNCIL=JSON.parse(lsGet('pt_dad_council')||'[]')}catch(_){}}}
+    const q=await getJSON('quotes.json');Q=q;QSTATE='ok';lsSet(PFX+'quotes',JSON.stringify(q));
+  }catch(e){QSTATE='error';if(!Q){try{const c=lsGet(PFX+'quotes');if(c)Q=JSON.parse(c)}catch(_){}}}
+  try{const c=await getJSON('council.json');COUNCIL=(c.calls||[]);lsSet(PFX+'council',JSON.stringify(COUNCIL))}catch(e){if(!COUNCIL.length){try{COUNCIL=JSON.parse(lsGet(PFX+'council')||'[]')}catch(_){}}}
   if(manual){btn.disabled=false;btn.innerHTML='&#8635; Refresh'}
   afterData();
   if(manual)toast(QSTATE==='ok'?'Prices updated':'Could not reach the price feed');
@@ -562,12 +569,52 @@ function afterData(){
   if(sheetKind==='buy')updateBuy();else if(sheetKind==null||sheetKind==='stock')render();
   if(sheetKind==null)render();
 }
+/* ---------- automatic save to the shared record (Google Sheet) ---------- */
+function deviceId(){let d=lsGet(PFX+'device');if(!d){d='d'+Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);lsSet(PFX+'device',d)}return d}
+function syncConnected(){return !!SYNC_URL&&!!S&&S.lastSyncOk>0&&Date.now()-S.lastSyncOk<7*DAY}
+function syncLine(){
+  if(!SYNC_URL)return'Not switched on yet.';
+  if(!S||!S.lastSyncOk)return'Last saved: not yet'+(S&&S.lastSyncAttempt?' (trying again soon)':'')+'.';
+  return'Last saved: '+fmtTime(new Date(S.lastSyncOk).toISOString())+'.';
+}
+function stateSig(){const {lastSyncAttempt,lastSyncOk,...rest}=S;return JSON.stringify(rest)}
+let syncTimer=null,syncBusy=false,lastSentSig=null;
+function scheduleSync(){if(!SYNC_URL||!S)return;if(stateSig()===lastSentSig)return;clearTimeout(syncTimer);syncTimer=setTimeout(()=>syncNow(false),3000)}
+function buildPayload(){
+  const names={};for(const t of S.trades){const q=qd(t.sym);if(q&&q.name)names[t.sym]=q.name}
+  for(const s of Object.keys(S.pos)){const q=qd(s);if(q&&q.name)names[s]=q.name}
+  let summary=null;
+  try{const v=valuation();const d=(qd('VOO')||{}).day||new Date().toISOString().slice(0,10);
+    summary={date:d,equity:v.equity,cash:S.cash,invested:v.pv,totalPct:v.totalPct,vooPct:v.vooRet,positions:v.rows.map(r=>({sym:r.sym,qty:r.qty,avg:r.avg,last:r.last,val:r.val,pnlPct:r.pnlPct}))}}catch(e){}
+  return{k:SYNC_KEY,player:PLAYER,device:deviceId(),sent_at:new Date().toISOString(),app_version:APP_VERSION,state:S,names,summary};
+}
+async function syncNow(force){
+  if(!SYNC_URL||!S)return;
+  if(syncBusy)return;
+  if(!force&&stateSig()===lastSentSig&&S.lastSyncOk&&Date.now()-S.lastSyncOk<9*60*1000)return;
+  syncBusy=true;S.lastSyncAttempt=Date.now();saveQuiet();
+  const sig=stateSig();
+  try{
+    await fetch(SYNC_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(buildPayload())});
+    /* no-cors: the reply cannot be read; getting here means the request left the device */
+    lastSentSig=sig;S.lastSyncOk=Date.now();saveQuiet();
+  }catch(e){/* offline: try again at the next trigger */}
+  syncBusy=false;
+  const el=document.getElementById('syncline');if(el)el.textContent=syncLine();
+}
+function startSync(){
+  if(!SYNC_URL)return;
+  syncNow(true);
+  setInterval(()=>{if(!document.hidden)syncNow(true)},10*60*1000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncNow(true)});
+  window.addEventListener('online',()=>syncNow(true));
+}
 function init(){
   S=load()||newState();
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
-  const c=lsGet('pt_dad_quotes');if(c){try{Q=JSON.parse(c)}catch(e){}}
-  try{COUNCIL=JSON.parse(lsGet('pt_dad_council')||'[]')}catch(e){}
-  render();save();fetchAll(false);
+  const c=lsGet(PFX+'quotes');if(c){try{Q=JSON.parse(c)}catch(e){}}
+  try{COUNCIL=JSON.parse(lsGet(PFX+'council')||'[]')}catch(e){}
+  render();save();fetchAll(false);startSync();
   setInterval(()=>{if(!document.hidden)fetchAll(false)},5*60*1000);
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)fetchAll(false)});
   if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
